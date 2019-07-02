@@ -7,18 +7,35 @@ var font_size = 16;
 var render_font = font_size + "px arial";
 var rows, columns;
 
-// An array to hold the falling texts.
-var falling_text = [];
+// An array to hold the number of falling texts we want to show.
+var falling_text = new Array(6);
 
 // Keep track of the animation interval.
 var intervalId;
+
+// A repository of the text availble for falling.
+class TextRepository {
+	//repository;  // Contains all the text we could use.
+	//n;           // Index of the next text to use.
+	// Define the text to show.
+	constructor() {
+		this.repository = ["Tyrannosaurus Rex", "Triceratops", "Velociraptor", "Stegosaurus", "Spinosaurus", "Archaeopteryx", "Brachiosaurus", "Allosaurus", "Apatosaurus", "Dilophosaurus"];
+		this.n = 0;
+	}
+	getText() {
+		if (this.n > this.repository.length) {
+			this.n = 0;
+		}
+		return this.repository[this.n++];
+	} 
+}
 
 // A piece of falling text.
 class FallingText {
 	//text;  // The text to display.
 	//x;     // It's column on the screen.
 	//y;     // It's row on the screen.
-  constructor(display_text, row_count, column_count) {
+	constructor(display_text, row_count, column_count) {
 		this.text = display_text;
 		// Start the text at a random point.
 		this.x = Math.floor(Math.random() * column_count);
@@ -46,11 +63,10 @@ function intialise() {
 	// Work out how many text rows and columns this gives us.
 	rows = canvas.height / font_size;
 	columns = canvas.width / font_size;
-	// Define some text to show.
-	var text = ["Tyrannosaurus Rex", "Triceratops", "Velociraptor", "Stegosaurus", "Spinosaurus", "Archaeopteryx", "Brachiosaurus", "Allosaurus", "Apatosaurus", "Dilophosaurus"];
 	// Populate initial display.
-	for(var i = 0; i < text.length; i++) {
-		falling_text[i] = new FallingText(text[i], rows, columns);
+	textRepo = new TextRepository();
+	for(var i = 0; i < falling_text.length; i++) {
+		falling_text[i] = new FallingText(textRepo.getText(), rows, columns);
 	}
 	// Run the animation.
 	intervalId = setInterval(render, 100);

@@ -2,15 +2,16 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
-// Make the canvas full screen
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
-
 // The canvas and font sizes govern the number of rows and columns available for text.
 var font_size = 16;
 var render_font = font_size + "px arial";
-var rows = canvas.height / font_size;
-var columns = canvas.width / font_size;
+var rows, columns;
+
+// An array to hold the falling texts.
+var falling_text = [];
+
+// Keep track of the animation interval.
+var intervalId;
 
 // A piece of falling text.
 class FallingText {
@@ -36,18 +37,26 @@ class FallingText {
 	}
 }
 
-// Define some text to show.
-var text = ["Tyrannosaurus Rex", "Triceratops", "Velociraptor", "Stegosaurus", "Spinosaurus", "Archaeopteryx", "Brachiosaurus", "Allosaurus", "Apatosaurus", "Dilophosaurus"];
-// The number of pieces of falling text.
-var falling_texts = text.length;
-// An array to hold the falling texts.
-var falling_text = [];
-// Populate initial display.
-for(var i = 0; i < falling_texts; i++) {
-	falling_text[i] = new FallingText(text[i], rows, columns);
+function intialise() {
+	// Stop any existing animation.
+	clearInterval(intervalId);
+	// Make the canvas match the window size.
+	canvas.height = window.innerHeight;
+	canvas.width = window.innerWidth;
+	// Work out how many text rows and columns this gives us.
+	rows = canvas.height / font_size;
+	columns = canvas.width / font_size;
+	// Define some text to show.
+	var text = ["Tyrannosaurus Rex", "Triceratops", "Velociraptor", "Stegosaurus", "Spinosaurus", "Archaeopteryx", "Brachiosaurus", "Allosaurus", "Apatosaurus", "Dilophosaurus"];
+	// Populate initial display.
+	for(var i = 0; i < text.length; i++) {
+		falling_text[i] = new FallingText(text[i], rows, columns);
+	}
+	// Run the animation.
+	intervalId = setInterval(render, 100);
 }
 
-// Render everything to the screen.
+// Redraw the canvas on each tick of the interval.
 function render() {
 	// Use a black background for the canvas with translucency for the trail effect.
 	ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
@@ -56,7 +65,7 @@ function render() {
 	ctx.fillStyle = "#00FF00";
 	ctx.font = render_font;
 	// Loop through the texts to display...
-	for(var i = 0; i < falling_texts; i++) {
+	for(var i = 0; i < falling_text.length; i++) {
 		var display_text = falling_text[i];
 		// Display the text.
 		display_text.render(font_size);
@@ -65,5 +74,8 @@ function render() {
 	}
 }
 
-// Run the animation.
-setInterval(render, 100);
+// Be ready to restart the animation if the window size changes.
+window.addEventListener("resize", intialise);
+
+// Kick off the animation.
+intialise();

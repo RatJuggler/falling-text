@@ -23,7 +23,7 @@ class TextRepository {
 		this.n = 0;
 	}
 	populateFromFile(file) {
-		// Extract text from the file split by line and c.
+		// Extract text from the file, split by line and convert to upper case.
 		fetch(file)
 			.then(response => response.text())
 			.then(text => this.repository = text.split('\n').map(s => s.toUpperCase()));

@@ -8,7 +8,7 @@ var render_font = font_size + "px arial";
 var rows, columns;
 
 // An array to hold the number of falling texts we want to show.
-var falling_text = new Array(6);
+var falling_text = new Array(8);
 
 // Keep track of the animation interval.
 var intervalId;
@@ -17,13 +17,19 @@ var intervalId;
 class TextRepository {
 	//repository;  // Contains all the text we could use.
 	//n;           // Index of the next text to use.
-	// Define the text to show.
+	// Define the inital text to show while the file loads.
 	constructor() {
-		this.repository = ["Tyrannosaurus Rex", "Triceratops", "Velociraptor", "Stegosaurus", "Spinosaurus", "Archaeopteryx", "Brachiosaurus", "Allosaurus", "Apatosaurus", "Dilophosaurus"];
+		this.repository = ["TYRANNOSAURUS", "TRICERATOPS", "VELOCIRAPTOR", "STEGOSAURUS", "SPINOSAURUS", "ARCHAEOPTERYX", "BRACHIOSAURUS", "ALLOSAURUS", "APATOSAURUS", "DILOPHOSAURUS"];
 		this.n = 0;
 	}
+	populateFromFile(file) {
+		// Extract text from the file split by line and c.
+		fetch(file)
+			.then(response => response.text())
+			.then(text => this.repository = text.split('\n').map(s => s.toUpperCase()));
+	}
 	getNextText() {
-		if (this.n > this.repository.length) {
+		if (this.n == this.repository.length) {
 			this.n = 0;
 		}
 		return this.repository[this.n++];
@@ -46,8 +52,9 @@ class FallingText {
 	}
 	moveDown(row_count, column_count) {
 		this.y++;
-		// Randomly send the text back to a new starting position at the top of the screen once it has reached the bottom.
+		// Grab a new text and send the falling item to a new starting position at the top of the screen once it has reached the bottom.
 		if (this.y > row_count && Math.random() > 0.9) {
+			this.text = textRepo.getNextText();
 			this.x = Math.floor(Math.random() * column_count);
 			this.y = 0;
 		}
@@ -65,6 +72,7 @@ function intialise() {
 	columns = canvas.width / font_size;
 	// Populate initial display.
 	textRepo = new TextRepository();
+	textRepo.populateFromFile("https://raw.githubusercontent.com/junosuarez/dinosaurs/master/dinosaurs.csv");
 	for(let i = 0; i < falling_text.length; i++) {
 		falling_text[i] = new FallingText(textRepo.getNextText(), rows, columns);
 	}

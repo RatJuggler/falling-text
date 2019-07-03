@@ -22,7 +22,7 @@ class TextRepository {
 		this.repository = ["Tyrannosaurus Rex", "Triceratops", "Velociraptor", "Stegosaurus", "Spinosaurus", "Archaeopteryx", "Brachiosaurus", "Allosaurus", "Apatosaurus", "Dilophosaurus"];
 		this.n = 0;
 	}
-	getText() {
+	getNextText() {
 		if (this.n > this.repository.length) {
 			this.n = 0;
 		}
@@ -65,8 +65,8 @@ function intialise() {
 	columns = canvas.width / font_size;
 	// Populate initial display.
 	textRepo = new TextRepository();
-	for(var i = 0; i < falling_text.length; i++) {
-		falling_text[i] = new FallingText(textRepo.getText(), rows, columns);
+	for(let i = 0; i < falling_text.length; i++) {
+		falling_text[i] = new FallingText(textRepo.getNextText(), rows, columns);
 	}
 	// Run the animation.
 	intervalId = setInterval(render, 100);
@@ -81,8 +81,8 @@ function render() {
 	ctx.fillStyle = "#00FF00";
 	ctx.font = render_font;
 	// Loop through the texts to display...
-	for(var i = 0; i < falling_text.length; i++) {
-		var display_text = falling_text[i];
+	for(let i = 0; i < falling_text.length; i++) {
+		let display_text = falling_text[i];
 		// Display the text.
 		display_text.render(font_size);
 		// Move it down the screen.

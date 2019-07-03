@@ -8,7 +8,7 @@ var render_font = font_size + "px arial";
 var rows, columns;
 
 // An array to hold the number of falling texts we want to show.
-var falling_text = new Array(8);
+var falling_text = new Array(9);
 
 // Keep track of the animation interval.
 var intervalId;

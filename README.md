@@ -1,7 +1,7 @@
 # falling-text
 Falling text effect similar to the Matrix digital rain.
 
-This is slightly more complex example using a JSON file of Premier League football results taken from https://datahub.io/sports-data/english-premier-league
+This is a slightly more complex example using a JSON file of Premier League football results taken from https://datahub.io/sports-data/english-premier-league
 
 Key to some of the data items:
 

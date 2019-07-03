@@ -19,21 +19,22 @@ class TextRepository {
 	//n;           // Index of the next text to use.
 	// Define the inital text to show while the file loads.
 	constructor() {
-		this.repository = ["TYRANNOSAURUS", "TRICERATOPS", "VELOCIRAPTOR", "STEGOSAURUS", "SPINOSAURUS", "ARCHAEOPTERYX", "BRACHIOSAURUS", "ALLOSAURUS", "APATOSAURUS", "DILOPHOSAURUS"];
+		this.repository = [{"AwayTeam": "Away Team", "Date": "01/08/2018", "Div": "E0", "FTAG": 0, "FTHG": 0, "FTR": "D", "HTAG": 0, "HTHG": 0, "HTR": "D", "HomeTeam": "Home Team", "Referee": "A Referee"}];
 		this.n = 0;
 	}
 	populateFromFile(file) {
-		// Extract text from the file split by line and c.
+		// Extract the JSON from the file.
 		fetch(file)
-			.then(response => response.text())
-			.then(text => this.repository = text.split('\n').map(s => s.toUpperCase()));
+			.then(response => response.json())
+			.then(json => this.repository = json);
 	}
 	getNextText() {
 		if (this.n == this.repository.length) {
 			this.n = 0;
 		}
-		return this.repository[this.n++];
-	} 
+		let result = this.repository[this.n++];
+		return result.HomeTeam + " " + result.FTHG + " - " + result.FTAG + " " + result.AwayTeam;
+	}
 }
 
 // A piece of falling text.
@@ -72,7 +73,7 @@ function intialise() {
 	columns = canvas.width / font_size;
 	// Populate initial display.
 	textRepo = new TextRepository();
-	textRepo.populateFromFile("https://raw.githubusercontent.com/junosuarez/dinosaurs/master/dinosaurs.csv");
+	textRepo.populateFromFile("https://raw.githubusercontent.com/RatJuggler/falling-text/football-example/data/premier-league-results.json");
 	for(let i = 0; i < falling_text.length; i++) {
 		falling_text[i] = new FallingText(textRepo.getNextText(), rows, columns);
 	}

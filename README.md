@@ -1,6 +1,4 @@
 # falling-text
 Falling text effect similar to the Matrix digital rain.
 
-Now using the excellent dinosaur name list resource from https://github.com/junosuarez/dinosaurs
-
-Fiddle with the code at https://jsfiddle.net/RatJuggler/5jtd0az7/
+This is slightly more complex example using a JSON file of Premier League football results taken from https://datahub.io/sports-data/english-premier-league 

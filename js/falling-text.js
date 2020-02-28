@@ -1,18 +1,27 @@
 // Knows how to render text on the canvas.
 class TextRenderer {
-	constructor(ctx) {
+	// ctx;     // context of the canvas to render on.
+	// height;  // to make the canvas.
+	// width;   // to make the canvas.
+	constructor(ctx, height, width) {
 		this.ctx = ctx;
+		this.ctx.canvas.height = height;
+		this.ctx.canvas.width = width;
 		// The canvas and font sizes govern the number of rows and columns available for text.
 		this.font_size = 16;
 		this.render_font = this.font_size + "px arial";
-		this.row_count = ctx.canvas.height / this.font_size;
-		this.column_count = ctx.canvas.width / this.font_size;
+		this.row_count = this.ctx.canvas.height / this.font_size;
+		this.column_count = this.ctx.canvas.width / this.font_size;
 	}
 	getRandomColumn() {
 		return Math.floor(Math.random() * this.column_count);
 	}
 	hasReachedBottom(row) {
 		return row > this.row_count
+	}
+	clearCanvas() {
+		this.ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+		this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 	}
 	render(text, x, y) {
 		// Set green text in the required font then render text.
@@ -47,40 +56,36 @@ class TextRepository {
 
 // A piece of falling text.
 class FallingText {
-	//text_repo;      // A repository of text to display.
-	//text_renderer;  // A renderer to display the text.
-	constructor(text_repo, text_renderer) {
-		this.text_repo = text_repo;
-		this.text_renderer = text_renderer;
+	//textRepo;      // A repository of text to display.
+	//textRenderer;  // A renderer to display the text.
+	constructor(textRepo, textRenderer) {
+		this.textRepo = textRepo;
+		this.textRenderer = textRenderer;
 		// Start new details.
 		this.new();
 	}
 	new() {
-		this.text = this.text_repo.getNextText();
-		this.x = this.text_renderer.getRandomColumn();
+		this.text = this.textRepo.getNextText();
+		this.x = this.textRenderer.getRandomColumn();
 		this.y = 0;
 	}
 	render() {
-		this.text_renderer.render(this.text, this.x, this.y);
+		this.textRenderer.render(this.text, this.x, this.y);
 	}
 	moveDown() {
 		this.y++;
 		// Grab a new text and send the falling item to a new starting position at the top of the screen once it has reached the bottom.
 		// Include a random element so they start to appear at different times.
-		if (this.text_renderer.hasReachedBottom(this.y) && Math.random() > 0.9) {
+		if (this.textRenderer.hasReachedBottom(this.y) && Math.random() > 0.9) {
 			this.new();
 		}
 	}
 }
 
 class RainController {
-	constructor(ctx) {
-		this.ctx = ctx;
-		// Make the canvas match the window size.
-		this.ctx.canvas.height = window.innerHeight;
-		this.ctx.canvas.width = window.innerWidth;
-		// Initialise an instance of the text renderer.
-		this.textRenderer = new TextRenderer(this.ctx);
+	// textRenderer;  // Knows how to render canvas and text.
+	constructor(textRenderer) {
+		this.textRenderer = textRenderer;
 		// Initialise an instance of the text repository.
 		let textRepo = new TextRepository();
 		// Populate initial display.
@@ -93,8 +98,7 @@ class RainController {
 	}
 	render() {
 		// Redraw the canvas on each tick of the interval.
-		this.ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-		this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+		this.textRenderer.clearCanvas();
 		// Loop through the texts to display...
 		for (let i = 0; i < this.falling_text.length; i++) {
 			let display_text = this.falling_text[i];
@@ -108,10 +112,15 @@ class RainController {
 
 // Look up the canvas element and get the context.
 const ctx = document.getElementById("canvas").getContext("2d");
+// Create a renderer that uses a canvas size matching the window size.
+let textRenderer = new TextRenderer(ctx, window.innerHeight, window.innerWidth);
 // Initialise everything.
-let rainController = new RainController(ctx);
+let rainController = new RainController(textRenderer);
 // Be ready to restart the animation if the window size changes.
-window.addEventListener("resize", function () {rainController = new RainController(ctx);});
+window.addEventListener("resize", function () {
+	textRenderer = new TextRenderer(ctx, window.innerHeight, window.innerWidth);
+	rainController = new RainController(textRenderer);
+});
 // Run the animation.
 setInterval(function () {
 	rainController.render();

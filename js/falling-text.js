@@ -1,12 +1,3 @@
-// Look up the canvas element and get the context.
-const ctx = document.getElementById("canvas").getContext("2d");
-
-// An array to hold the number of falling texts we want to show.
-const falling_text = new Array(9);
-
-// Keep track of the animation interval.
-let intervalId;
-
 // Knows how to render text on the canvas.
 class TextRenderer {
 	constructor(ctx) {
@@ -82,42 +73,51 @@ class FallingText {
 	}
 }
 
-function initialise() {
-	// Stop any existing animation.
-	clearInterval(intervalId);
-	// Make the canvas match the window size.
-	ctx.canvas.height = window.innerHeight;
-	ctx.canvas.width = window.innerWidth;
-	// Initialise an instance of the text renderer.
-	let textRenderer = new TextRenderer(ctx);
-	// Initialise an instance of the text repository.
-	let textRepo = new TextRepository();
-	// Populate initial display.
-	textRepo.populateFromFile("https://raw.githubusercontent.com/junosuarez/dinosaurs/master/dinosaurs.csv");
-	for(let i = 0; i < falling_text.length; i++) {
-		falling_text[i] = new FallingText(textRepo, textRenderer);
+class RainController {
+	constructor(ctx) {
+		this.ctx = ctx;
+		// Initialise an instance of the text renderer.
+		let textRenderer = new TextRenderer(this.ctx);
+		// Initialise an instance of the text repository.
+		let textRepo = new TextRepository();
+		// Populate initial display.
+		textRepo.populateFromFile("https://raw.githubusercontent.com/junosuarez/dinosaurs/master/dinosaurs.csv");
+		// An array to hold details of the falling text we want to show.
+		this.falling_text = new Array(9);
+		for (let i = 0; i < this.falling_text.length; i++) {
+			this.falling_text[i] = new FallingText(textRepo, textRenderer);
+		}
 	}
-	// Run the animation.
-	intervalId = setInterval(render, 100);
+	render() {
+		// Loop through the texts to display...
+		for (let i = 0; i < this.falling_text.length; i++) {
+			let display_text = this.falling_text[i];
+			// Display the text.
+			display_text.render();
+			// Move it down the screen.
+			display_text.moveDown();
+		}
+	}
 }
+
+// Be ready to restart the animation if the window size changes.
+//window.addEventListener("resize", initialise);
+
+// Look up the canvas element and get the context.
+const ctx = document.getElementById("canvas").getContext("2d");
+// Make the canvas match the window size.
+ctx.canvas.height = window.innerHeight;
+ctx.canvas.width = window.innerWidth;
+// Initialise everything.
+let rainController = new RainController(ctx);
 
 // Redraw the canvas on each tick of the interval.
 function render() {
 	// Use a black background for the canvas with translucency for the trail effect.
 	ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-	// Loop through the texts to display...
-	for(let i = 0; i < falling_text.length; i++) {
-		let display_text = falling_text[i];
-		// Display the text.
-		display_text.render();
-		// Move it down the screen.
-		display_text.moveDown();
-	}
+	rainController.render();
 }
 
-// Be ready to restart the animation if the window size changes.
-window.addEventListener("resize", initialise);
-
-// Kick off the animation.
-initialise();
+// Run the animation.
+setInterval(render, 100);

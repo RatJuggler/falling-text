@@ -76,8 +76,11 @@ class FallingText {
 class RainController {
 	constructor(ctx) {
 		this.ctx = ctx;
+		// Make the canvas match the window size.
+		this.ctx.canvas.height = window.innerHeight;
+		this.ctx.canvas.width = window.innerWidth;
 		// Initialise an instance of the text renderer.
-		let textRenderer = new TextRenderer(this.ctx);
+		this.textRenderer = new TextRenderer(this.ctx);
 		// Initialise an instance of the text repository.
 		let textRepo = new TextRepository();
 		// Populate initial display.
@@ -85,10 +88,13 @@ class RainController {
 		// An array to hold details of the falling text we want to show.
 		this.falling_text = new Array(9);
 		for (let i = 0; i < this.falling_text.length; i++) {
-			this.falling_text[i] = new FallingText(textRepo, textRenderer);
+			this.falling_text[i] = new FallingText(textRepo, this.textRenderer);
 		}
 	}
 	render() {
+		// Redraw the canvas on each tick of the interval.
+		this.ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+		this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 		// Loop through the texts to display...
 		for (let i = 0; i < this.falling_text.length; i++) {
 			let display_text = this.falling_text[i];
@@ -100,24 +106,13 @@ class RainController {
 	}
 }
 
-// Be ready to restart the animation if the window size changes.
-//window.addEventListener("resize", initialise);
-
 // Look up the canvas element and get the context.
 const ctx = document.getElementById("canvas").getContext("2d");
-// Make the canvas match the window size.
-ctx.canvas.height = window.innerHeight;
-ctx.canvas.width = window.innerWidth;
 // Initialise everything.
-let rainController = new RainController(ctx);
-
-// Redraw the canvas on each tick of the interval.
-function render() {
-	// Use a black background for the canvas with translucency for the trail effect.
-	ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-	rainController.render();
-}
-
+const rainController = new RainController(ctx);
+// Be ready to restart the animation if the window size changes.
+//window.addEventListener("resize", rainController.resize);
 // Run the animation.
-setInterval(render, 100);
+setInterval(function () {
+	rainController.render();
+}, 100);

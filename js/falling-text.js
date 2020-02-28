@@ -1,9 +1,6 @@
 // Look up the canvas element and get the context.
 const ctx = document.getElementById("canvas").getContext("2d");
 
-// Track font render details and text to use.
-let renderFont, textRepo;
-
 // An array to hold the number of falling texts we want to show.
 const falling_text = new Array(9);
 
@@ -12,12 +9,17 @@ let intervalId;
 
 // Details of
 class RenderFont {
-	constructor() {
+	constructor(ctx) {
+		this.ctx = ctx;
 		// The canvas and font sizes govern the number of rows and columns available for text.
 		this.font_size = 16;
 		this.render_font = this.font_size + "px arial";
-		this.rows = ctx.canvas.height / this.font_size;
-		this.columns = ctx.canvas.width / this.font_size;
+		this.row_count = ctx.canvas.height / this.font_size;
+		this.column_count = ctx.canvas.width / this.font_size;
+	}
+	render(text, x, y) {
+		this.ctx.font = this.render_font;
+		this.ctx.fillText(text, x * this.font_size, y * this.font_size);
 	}
 }
 
@@ -46,24 +48,25 @@ class TextRepository {
 
 // A piece of falling text.
 class FallingText {
-	//text;  // The text to display.
-	//x;     // It's column on the screen.
-	//y;     // It's row on the screen.
-	constructor(display_text, row_count, column_count) {
-		this.text = display_text;
+	//text_repo;    // A repository of text to display.
+	//render_repo;  //
+	constructor(text_repo, render_font) {
+		this.text_repo = text_repo;
+		this.render_font = render_font;
 		// Start the text at a random point.
-		this.x = Math.floor(Math.random() * column_count);
-		this.y = Math.floor(Math.random() * row_count);
+		this.text = this.text_repo.getNextText();
+		this.x = Math.floor(Math.random() * this.render_font.column_count);
+		this.y = Math.floor(Math.random() * this.render_font.row_count);
 	}
-	render(in_font_size) {
-		ctx.fillText(this.text, this.x * in_font_size, this.y * in_font_size);
+	render() {
+		this.render_font.render(this.text, this.x, this.y);
 	}
-	moveDown(row_count, column_count) {
+	moveDown() {
 		this.y++;
 		// Grab a new text and send the falling item to a new starting position at the top of the screen once it has reached the bottom.
-		if (this.y > row_count && Math.random() > 0.9) {
-			this.text = textRepo.getNextText();
-			this.x = Math.floor(Math.random() * column_count);
+		if (this.y > this.render_font.row_count && Math.random() > 0.9) {
+			this.text = this.text_repo.getNextText();
+			this.x = Math.floor(Math.random() * this.render_font.column_count);
 			this.y = 0;
 		}
 	}
@@ -76,13 +79,13 @@ function initialise() {
 	ctx.canvas.height = window.innerHeight;
 	ctx.canvas.width = window.innerWidth;
 	// Initialise an instance of the font rendering details.
-	renderFont = new RenderFont();
+	let renderFont = new RenderFont(ctx);
 	// Initialise an instance of the text repository.
-	textRepo = new TextRepository();
+	let textRepo = new TextRepository();
 	// Populate initial display.
 	textRepo.populateFromFile("https://raw.githubusercontent.com/junosuarez/dinosaurs/master/dinosaurs.csv");
 	for(let i = 0; i < falling_text.length; i++) {
-		falling_text[i] = new FallingText(textRepo.getNextText(), renderFont.rows, renderFont.columns);
+		falling_text[i] = new FallingText(textRepo, renderFont);
 	}
 	// Run the animation.
 	intervalId = setInterval(render, 100);
@@ -95,14 +98,13 @@ function render() {
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 	// Set green text in the required font.
 	ctx.fillStyle = "#00FF00";
-	ctx.font = renderFont.render_font;
 	// Loop through the texts to display...
 	for(let i = 0; i < falling_text.length; i++) {
 		let display_text = falling_text[i];
 		// Display the text.
-		display_text.render(renderFont.font_size);
+		display_text.render();
 		// Move it down the screen.
-		display_text.moveDown(renderFont.rows, renderFont.columns);
+		display_text.moveDown();
 	}
 }
 

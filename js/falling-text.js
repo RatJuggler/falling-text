@@ -109,9 +109,9 @@ class RainController {
 // Look up the canvas element and get the context.
 const ctx = document.getElementById("canvas").getContext("2d");
 // Initialise everything.
-const rainController = new RainController(ctx);
+let rainController = new RainController(ctx);
 // Be ready to restart the animation if the window size changes.
-//window.addEventListener("resize", rainController.resize);
+window.addEventListener("resize", function () {rainController = new RainController(ctx);});
 // Run the animation.
 setInterval(function () {
 	rainController.render();
